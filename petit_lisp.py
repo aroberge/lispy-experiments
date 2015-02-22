@@ -1,14 +1,16 @@
 '''New class based version
 '''
 
-import importlib
 import operator
 import re
 import traceback
 import sys
-
+from src.file_loader import FileLoader
+from src import python_utils
 
 exit.__doc__ = "Quits the repl."
+
+loader = FileLoader()
 
 
 class Lisp:
@@ -48,83 +50,6 @@ class Lisp:
         return list(expr[0][1:])
 
 
-class Python:
-    '''Grouping Python functions into logical unit'''
-
-    @staticmethod
-    def load_module(module, env=None):
-        '''Usage (load-py 'module_name)'''
-        mod = importlib.import_module(module)
-        env.update(vars(mod))
-
-    @staticmethod
-    def from_module_load(module, *names, env=None):
-        '''Usage (from-py-load 'module_name 'var1 'var2 ...)'''
-        mod = importlib.import_module(module)
-        for name in names:
-            env.update({name: getattr(mod, name)})
-
-    @staticmethod
-    def from_module_load_variable_as(module, *names, env=None):
-        '''Usage: (from-py-load-as 'module_name '(var1 name1) '(var2 name2) ...)'''
-        mod = importlib.import_module(module)
-        for name, name_as in names:
-            env.update({name_as: getattr(mod, name)})
-
-    @staticmethod
-    def with_instance(inst, attr, *args):
-        '''Usage: (with-py-inst instance 'attribute OR method arg1 arg 2 ...)'''
-        if hasattr(inst, attr):
-            attr = getattr(inst, attr)
-            if callable(attr):
-                return attr(*args)
-            else:
-                return attr
-        else:
-            print("{} has no attribute {}.".format(inst, attr))
-
-
-class FileLoader:
-    """Execute a "lisp" program in a file"""
-
-    def __init__(self, filename):
-        print("    --> Loading and executing {}".format(filename))
-
-        with open(filename, "r") as f:
-            program = f.readlines()
-        rps = self.running_paren_sums(program)
-        full_line = ""
-        for ((linenumber, paren_sum), program_line) in zip(rps, program):
-            if ";" in program_line:
-                program_line = program_line.split(";")[0]
-            program_line = program_line.strip()
-            full_line += program_line + " "
-            if paren_sum == 0 and full_line.strip():
-                try:
-                    val = evaluate(parse(full_line))
-                    if val is not None:
-                        print(val)
-                except Exception as e:
-                    print("\n    An error occured in loading %s:" % filename)
-                    print("line {}:\n{}".format(linenumber, full_line))
-                    print('      {}: {}'.format(type(e).__name__, e))
-                    break
-                full_line = ""
-
-    def running_paren_sums(self, program):
-        """
-        Map the lines in the list program to a list whose entries contain
-        a running sum of the per-line difference between the number of '('
-        parentheses and the number of ')' parentheses.
-        """
-        total = 0
-        rps = []
-        for linenumber, line in enumerate(program):
-            total += line.count("(")-line.count(")")
-            rps.append((linenumber, total))
-        return rps
-
-
 def display(s):
     '''Prints a single string.  Strings are enclosed between double quotes
        and do not allow escaped double quote characters'''
@@ -151,14 +76,14 @@ def common_env(env):
         '#t': True,
         '#f': False,
         'not': operator.not_,
-        'load': FileLoader,
+        'load': loader.load,
         'DEBUG': False,
         'nil': [],
         'print': display,
-        'load-py': Python.load_module,
-        'from-py-load': Python.from_module_load,
-        'from-py-load-as': Python.from_module_load_variable_as,
-        'with-py-inst': Python.with_instance,
+        'load-py': python_utils.load_module,
+        'from-py-load': python_utils.from_module_load,
+        'from-py-load-as': python_utils.from_module_load_variable_as,
+        'with-py-inst': python_utils.with_instance,
         'set-docstring': Procedure.set_docstring
     })
     return env
@@ -320,6 +245,8 @@ class Parser:
         return s
 
 parse = Parser().parse
+loader.evaluate = evaluate
+loader.parse = parse
 
 
 class InteractiveInterpreter:
@@ -439,8 +366,8 @@ class InteractiveInterpreter:
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        FileLoader(sys.argv[1])
+        loader.load(sys.argv[1])
     else:
-        FileLoader("default_language.lisp")
+        loader.load("default_language.lisp")
     interpreter = InteractiveInterpreter()
     interpreter.start()

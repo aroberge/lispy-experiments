@@ -86,13 +86,13 @@ class TestEvaluate(unittest.TestCase):
         self.assertEqual(None, pl.evaluate(pl.parse("(define square (lambda (x) (* x x)))")))
         self.assertEqual(9, pl.evaluate(pl.parse("(square 3)")))
 
-    def test_load_file(self):
-        pl.FileLoader("../define_variable_test.lisp")
-        self.assertEqual(3, pl.evaluate(pl.parse("x")))
+    # def test_load_file(self):
+    #     pl.loader.load("../define_variable_test.lisp")
+    #     self.assertEqual(3, pl.evaluate(pl.parse("x")))
 
-    def test_load_file_with_comments(self):
-        pl.FileLoader("../comments_test.lisp")
-        self.assertEqual(49, pl.evaluate(pl.parse("(square 7)")))
+    # def test_load_file_with_comments(self):
+    #     pl.loader.load("../comments_test.lisp")
+    #     self.assertEqual(49, pl.evaluate(pl.parse("(square 7)")))
 
     def test_sqrt(self):
         # verify that math functions are loaded properly; only need to verify one
@@ -104,8 +104,8 @@ class TestEvaluate(unittest.TestCase):
         self.assertEqual(4.0, pl.evaluate(pl.parse("(sqrt 16)")))
 
     def test_load_python_scope(self):
-        pl.FileLoader("scope_test.lisp")
-        self.assertEqual(3, pl.evaluate(pl.parse("(* 1 pi)")))
+        pl.loader.load("scope_test.lisp")
+        self.assertEqual(3, pl.evaluate(pl.parse("pi")))
         from math import pi
         self.assertEqual(pi, pl.evaluate(pl.parse("(mul_pi 1)")))
 
