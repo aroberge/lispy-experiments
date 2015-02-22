@@ -58,7 +58,6 @@ def display(s):
 
 def common_env(env):
     "Add some built-in procedures and variables to the environment."
-    env = Env()
     env.update({
         'begin': Lisp.begin,
         'atom?': Lisp.is_atom,
@@ -141,8 +140,10 @@ class Env(dict):
 global_env = common_env(Env())
 
 
-def evaluate(x, env=global_env):
+def evaluate(x, env=None):
     "Evaluate an expression in an environment."
+    if env is None:
+        env = global_env
     if isinstance(x, str):            # variable reference
         return env.find(x)[x]
     elif not isinstance(x, list):     # constant literal

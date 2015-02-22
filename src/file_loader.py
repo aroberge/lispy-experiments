@@ -8,7 +8,7 @@ class FileLoader:
 
     def load(self, filename):
         '''loads, parse and evaluate/executes a lisp program'''
-        print("    --> Loading and executing {}".format(filename))
+        print("    --> Loading {}".format(filename))
 
         with open(filename, "r") as f:
             program = f.readlines()

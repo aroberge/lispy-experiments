@@ -4,13 +4,13 @@ import mock
 import unittest
 import petit_lisp as pl
 
+from src.repl import InteractiveInterpreter
+
 parse = pl.parse
 
 
 def evaluate(s):
     return pl.evaluate(parse(s))
-
-evaluate("(load 'default_language.lisp)")
 
 
 class TestRead(unittest.TestCase):
@@ -18,12 +18,12 @@ class TestRead(unittest.TestCase):
 
     @mock.patch('builtins.input', return_value="(a b c)")
     def test_get_expr_all_at_once(self, input):
-        repl = pl.InteractiveInterpreter(pl.evaluate, parse, pl.global_env)
+        repl = InteractiveInterpreter(pl.evaluate, parse, pl.global_env)
         self.assertEqual("(a b c)", repl.read_expression())
 
     @mock.patch('builtins.input', side_effect=['(a', 'b', 'c)'])
     def test_get_expr_in_parts(self, input):
-        repl = pl.InteractiveInterpreter(pl.evaluate, parse, pl.global_env)
+        repl = InteractiveInterpreter(pl.evaluate, parse, pl.global_env)
         self.assertEqual("(a b c)", repl.read_expression())
 
 
@@ -44,6 +44,15 @@ class TestParse(unittest.TestCase):
 
 class TestEvaluate(unittest.TestCase):
     '''Evaluate expressions, using the parse function as a first step'''
+
+    def setUp(self):  # noqa
+        pl.global_env = pl.common_env(pl.Env())
+        self.fresh_env = pl.common_env(pl.Env())
+        evaluate("(load 'default_language.lisp)")
+
+    def tearDown(self):  # noqa
+        pl.global_env = self.fresh_env
+
     def test_add(self):
         self.assertEqual(7, evaluate("(+ 3 4)"))
 
@@ -100,10 +109,6 @@ class TestEvaluate(unittest.TestCase):
     #     pl.loader.load("../comments_test.lisp")
     #     self.assertEqual(49, evaluate("(square 7)"))
 
-    def test_sqrt(self):
-        # verify that math functions are loaded properly; only need to verify one
-        self.assertEqual(4.0, evaluate("(sqrt 16)"))
-
     def test_load_python(self):
         # verify that Python module can be imported properly
         evaluate('(load-py (quote math))')
@@ -117,6 +122,14 @@ class TestEvaluate(unittest.TestCase):
 
 
 class TestLogic(unittest.TestCase):
+
+    def setUp(self):  # noqa
+        pl.global_env = pl.common_env(pl.Env())
+        self.fresh_env = pl.common_env(pl.Env())
+        evaluate("(load 'default_language.lisp)")
+
+    def tearDown(self):  # noqa
+        pl.global_env = self.fresh_env
 
     def test_if(self):
         # test "if", "#t", "#f"
@@ -139,7 +152,7 @@ class TestLogic(unittest.TestCase):
     (cond ((> x 0) x)
           ((= x 0) 0)
           ((< x 0) (- x)))))"""
-        self.assertEqual(None, evaluate(expr))
+        evaluate(expr)
         self.assertEqual(2, evaluate("(abs 2)"))
         self.assertEqual(3, evaluate("(abs -3)"))
         self.assertEqual(0, evaluate("(abs 0)"))
@@ -151,13 +164,16 @@ class TestLogic(unittest.TestCase):
     (cond ((<= x 0) (- x))
           (else x)
           )))"""
-        self.assertEqual(None, evaluate(expr))
+        evaluate(expr)
         self.assertEqual(2, evaluate("(abs2 2)"))
         self.assertEqual(3, evaluate("(abs2 -3)"))
         self.assertEqual(0, evaluate("(abs2 0)"))
 
 
 class TestLists(unittest.TestCase):
+
+    def setUp(self):  # noqa
+        pl.global_env = pl.common_env(pl.Env())
 
     def test_cons(self):
         expr = "(define a (cons 1 (cons 2 (cons 3 (cons 4 '())))))"
