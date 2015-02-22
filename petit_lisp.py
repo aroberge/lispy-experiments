@@ -2,11 +2,11 @@
 '''
 
 import operator
-import re
-import traceback
 import sys
 from src.file_loader import FileLoader
 from src import python_utils
+from src.parser import Parser
+from src.repl import InteractiveInterpreter
 
 exit.__doc__ = "Quits the repl."
 
@@ -190,178 +190,9 @@ def evaluate(x, env=global_env):
             return procedure(*exps)
 
 
-class Parser:
-    "Parse a Lisp expression from a string"
-    def __init__(self):
-        self.regex = re.compile('"(?:[^"])*"')
-
-    def parse(self, s):
-        "Parse a Lisp expression from a string."
-        return self.convert_to_list(self.tokenize(s))
-
-    def convert_to_list(self, tokens):
-        "Converts a sequence of tokens into a list"
-        if len(tokens) == 0:
-            raise SyntaxError('convert_to_list: unexpected EOF while reading')
-        token = tokens.pop(0)
-        if '(' == token:
-            lst = []
-            while tokens[0] != ')':
-                lst.append(self.convert_to_list(tokens))
-            tokens.pop(0)   # pop off ')'
-            return lst
-        elif ')' == token:
-            raise SyntaxError('convert_to_list: unexpected )')
-        elif "'" == token:
-            return ['quote', self.convert_to_list(tokens)]
-        else:
-            return self.atomize(token)
-
-    def atomize(self, token):
-        "Converts individual tokens to numbers if possible"
-        for conversion in [int, float, complex]:
-            try:
-                return conversion(token.replace('i', 'j'))   # Python uses j instead
-            except ValueError:                               # of i for sqrt(-1)
-                pass
-        return token
-
-    def tokenize(self, s):
-        "Convert a string into a list of tokens."
-        if '"' in s:
-            s = self.replace_strings(s)
-        return s.replace("(", " ( ").replace(")", " ) ").replace("'", " ' ").split()
-
-    def replace_strings(self, s):                       # noqa
-        '''replace double quoted strings by # followed by their Python id
-           and stores the correspondance in the global environment
-
-           Does not make allowance for escaped double quote (\") character.'''
-        quoted_strings = re.findall(self.regex, s)
-        for s_ in quoted_strings:
-            symbol = "#{}".format(id(s_))
-            s = s.replace(s_, symbol)
-            global_env[symbol] = s_
-        return s
-
-parse = Parser().parse
+parse = Parser(global_env).parse
 loader.evaluate = evaluate
 loader.parse = parse
-
-
-class InteractiveInterpreter:
-    '''A simple interpreter with built-in help'''
-    def __init__(self):
-        self.started = False
-        self.prompt = 'repl> '
-        self.prompt2 = ' ... '
-
-    def repl(self):
-        "A read-eval-print loop."
-        self.started = True
-        print("\n  ====  Enter (quit) to end.  ====\n")
-        while True:
-            inp = self.read_expression()
-            if not inp:
-                continue
-            try:
-                val = evaluate(parse(inp))
-                if val is not None:
-                    print(self.to_string(val))
-            except (KeyboardInterrupt, SystemExit):
-                print("\n   Goodbye!")
-                return
-            except Exception as e:
-                print('      {}: {}'.format(type(e).__name__, e))
-                if global_env["DEBUG"]:
-                    traceback.print_exc()
-
-    def read_expression(self):
-        '''Reads an expression from a prompt'''
-        inp = input(self.prompt)
-        open_parens = inp.count("(") - inp.count(")")
-        while open_parens > 0:
-            inp += ' ' + input(self.prompt2)
-            open_parens = inp.count("(") - inp.count(")")
-
-        if inp.startswith(("parse", "help", "dir")):
-            self.handle_internally(inp)
-            return None
-        return inp
-
-    def handle_internally(self, inp):
-        if inp.startswith("parse "):
-            expr = inp[6:]
-            print("     {}\n".format(parse(expr)))
-        elif inp.startswith("help"):
-            help = inp.split()
-            if len(help) == 1:
-                self.show_variables()
-            else:
-                self.show_variables(help[1])
-        elif inp.startswith("dir"):
-            print("\n{}\n".format([x for x in global_env.keys()
-                                    if not x.startswith("__")]))
-
-    def start(self):
-        '''starts the interpreter if not already running'''
-        if self.started:
-            return
-        try:
-            self.repl()
-        except BaseException:
-            # do not use print after KeyboardInterrupt
-            raise
-            sys.stdout.write("\n      Exiting petit_lisp.")
-
-    def to_string(self, exp):
-        "Convert a Python object back into a Lisp-readable string."
-        if not isinstance(exp, list):
-            if exp is True:
-                return "#t"
-            elif exp is False:
-                return "#f"
-            elif isinstance(exp, complex):
-                return str(exp).replace('j', 'i')[1:-1]  # remove () put by Python
-            return str(exp)
-        else:
-            return '(' + ' '.join(self.to_string(s) for s in exp) + ')'
-
-    def show_value(self, var, env):
-        '''Displays the value of a variable in a given environment or dict'''
-        val = env[var]
-        if not isinstance(val, (int, float, complex, str)):
-            if hasattr(val, '__doc__') and val.__doc__ is not None:
-                val = ' '.join(val.__doc__.split('\n')[:3])
-        if isinstance(val, str):
-            if len(val) > 75:
-                val = val[:75].strip() + "..."
-        print("  {}: {}".format(var, val))
-
-    def show_variables(self, obj=None):
-        '''Inspired by Python's help: shows a list of defined names and
-           their values or description
-        '''
-        env = global_env
-        if obj == "help":
-            print("Usage:  help, help variable, help globals, "
-                   "help user-defined")
-        elif obj not in [None, "user-defined", "globals"]:
-            if obj not in env:
-                print("Unknown variable: ", obj)
-            else:
-                self.show_value(obj, env)
-        else:
-            names = sorted(env.keys())
-            for var in names:
-                if var.startswith('__'):
-                    continue
-                if obj == "user-defined" and var in common_env(Env()):
-                    continue
-                elif obj == "globals" and var not in common_env(Env()):
-                    continue
-                self.show_value(var, env)
-        print()
 
 
 if __name__ == "__main__":
@@ -369,5 +200,5 @@ if __name__ == "__main__":
         loader.load(sys.argv[1])
     else:
         loader.load("default_language.lisp")
-    interpreter = InteractiveInterpreter()
+    interpreter = InteractiveInterpreter(evaluate, parse, global_env)
     interpreter.start()
