@@ -40,10 +40,9 @@ class Lisp:
     @staticmethod
     def cons(*expr):
         '''Usage (cons expr list) => (expr list) '''
-        _x = expr[1]
-        if not isinstance(_x, list):
-            _x = [_x]
-        return [expr[0]] + _x
+        if not isinstance(expr[1], list):
+            raise ValueError("Second argument of cons must be a list.")
+        return [expr[0]] + expr[1]
 
 lisp_procs = {
     'begin': Lisp.begin,
