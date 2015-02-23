@@ -14,27 +14,27 @@ class Lisp:
 
     @staticmethod
     def begin(*expr):
-        '''Usage: (begin expr1 ... expr_last) ==> evaluates all and returns expr_last'''
+        '''(begin expr1 ... expr_last) ==> evaluates all and returns expr_last'''
         return expr[-1]
 
     @staticmethod
     def is_atom(atom):
-        '''Usage: (atom? expr) ==> true if expr is not a list'''
+        '''(atom? expr) ==> true if expr is not a list'''
         return not isinstance(atom, list)
 
     @staticmethod
     def are_equal(val1, val2):
-        '''Usage: (eq? expr1 expr2) ==> true if both are atoms and equal'''
+        '''(eq? expr1 expr2) ==> true if both are atoms and equal'''
         return (not isinstance(val1, list)) and (val1 == val2)
 
     @staticmethod
     def car(*expr):
-        '''Usage: (car (exp1 exp2 exp3 ...)) ==> exp1'''
+        '''(car (exp1 exp2 exp3 ...)) ==> exp1'''
         return expr[0][0]
 
     @staticmethod
     def cdr(*expr):
-        '''Usage: (car (exp1 exp2 exp3 ...)) ==> (exp2 exp3 ...)'''
+        '''(car (exp1 exp2 exp3 ...)) ==> (exp2 exp3 ...)'''
         return list(expr[0][1:])
 
     @staticmethod

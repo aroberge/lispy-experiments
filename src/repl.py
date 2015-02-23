@@ -101,7 +101,9 @@ class InteractiveInterpreter:
         if isinstance(val, str):
             if len(val) > 75:
                 val = val[:75].strip() + "..."
-        print("  {}: {}".format(var, val))
+            if val.startswith("list()"):
+                val = "Empty list"
+        print("{0:15}: {1:75}".format(var, self.to_string(val)))
 
     def show_variables(self, obj=None):
         '''Inspired by Python's help: shows a list of defined names and
