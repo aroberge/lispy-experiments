@@ -5,9 +5,10 @@ import re
 
 class Parser:
     "Parse a Lisp expression from a string"
-    def __init__(self, global_env=None):
+    def __init__(self, global_env=None, STRINGS=None):  # noqa
         self.regex = re.compile('"(?:[^"])*"')
         self.global_env = global_env
+        self.STRINGS = STRINGS
 
     def parse(self, s):
         "Parse a Lisp expression from a string."
@@ -56,5 +57,5 @@ class Parser:
         for s_ in quoted_strings:
             symbol = "#{}".format(id(s_))
             s = s.replace(s_, symbol)
-            self.global_env[symbol] = s_
+            self.STRINGS[symbol] = s_
         return s

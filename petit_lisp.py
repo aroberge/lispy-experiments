@@ -1,7 +1,6 @@
 '''New class based version
 '''
 
-import operator
 import sys
 from src.file_loader import FileLoader
 from src import python_utils
@@ -11,6 +10,8 @@ from src.repl import InteractiveInterpreter
 exit.__doc__ = "Quits the repl."
 
 loader = FileLoader()
+
+STRINGS = {}
 
 
 class Lisp:
@@ -49,6 +50,14 @@ class Lisp:
         '''Usage: (car (exp1 exp2 exp3 ...)) ==> (exp2 exp3 ...)'''
         return list(expr[0][1:])
 
+    @staticmethod
+    def cons(*expr):
+        '''Usage (cons expr list) => (expr list) '''
+        _x = expr[1]
+        if not isinstance(_x, list):
+            _x = [_x]
+        return [expr[0]] + _x
+
 
 def display(s):
     '''Prints a single string.  Strings are enclosed between double quotes
@@ -64,20 +73,12 @@ def common_env(env):
         'eq?': Lisp.are_equal,
         'car': Lisp.car,
         'cdr': Lisp.cdr,
-        '/': operator.truediv,
-        '//': operator.floordiv,
-        '>': operator.gt,
-        '<': operator.lt,
-        '>=': operator.ge,
-        '<=': operator.le,
-        '=': operator.eq,
+        'cons': Lisp.cons,
         'quit': exit,
-        '#t': True,
-        '#f': False,
-        'not': operator.not_,
+        '__True__': True,
+        '__False__': False,
         'load': loader.load,
-        'DEBUG': False,
-        'nil': [],
+        '_DEBUG': False,
         'print': display,
         'load-py': python_utils.load_module,
         'from-py-load': python_utils.from_module_load,
@@ -118,7 +119,8 @@ class Procedure(object):
     @staticmethod
     def set_docstring(obj, s):
         '''Sets the docstring of an object; useful for user-defined procedures'''
-        obj.__doc__ = s
+        # strings are stored with enclosing double quote characters
+        obj.__doc__ = s[1:-1]
 
 
 class Env(dict):
@@ -145,6 +147,8 @@ def evaluate(x, env=None):
     if env is None:
         env = global_env
     if isinstance(x, str):            # variable reference
+        if x in STRINGS:
+            return STRINGS[x]
         return env.find(x)[x]
     elif not isinstance(x, list):     # constant literal
         return x
@@ -153,12 +157,6 @@ def evaluate(x, env=None):
     if first == 'quote':              # (quote exp), or 'exp
         (_, exp) = x
         return exp
-    elif first == 'cons':              # (cons exp1 exp2)
-        (_, exp1, exp2) = x
-        _x = evaluate(exp2, env)
-        if not isinstance(_x, list):
-            _x = [_x]
-        return [evaluate(exp1, env)] + _x
     elif first == 'define':            # (define var exp)
         (_, var, exp) = x
         env[var] = evaluate(exp, env)
@@ -179,9 +177,6 @@ def evaluate(x, env=None):
     elif first == 'if':                # (if test if_true other)
         (_, test, if_true, other) = x
         return evaluate((if_true if evaluate(test, env) else other), env)
-    elif first == 'null?':             # (null? exp)
-        (_, exp) = x
-        return evaluate(exp, env) == []
     else:                             # ("procedure" exp*)
         exps = [evaluate(exp, env) for exp in x]
         procedure = exps.pop(0)
@@ -190,8 +185,7 @@ def evaluate(x, env=None):
         except TypeError:
             return procedure(*exps)
 
-
-parse = Parser(global_env).parse
+parse = Parser(global_env, STRINGS).parse
 loader.evaluate = evaluate
 loader.parse = parse
 

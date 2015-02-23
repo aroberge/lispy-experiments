@@ -132,17 +132,17 @@ class TestLogic(unittest.TestCase):
         pl.global_env = self.fresh_env
 
     def test_if(self):
-        # test "if", "#t", "#f"
-        evaluate("(if #t (define x 1) (define x 2))")
+        # test "if", "__True__", "__False__"
+        evaluate("(if __True__ (define x 1) (define x 2))")
         self.assertEqual(1, evaluate("x"))
-        evaluate("(if #f (define x 3) (define x 4))")
+        evaluate("(if __False__ (define x 3) (define x 4))")
         self.assertEqual(4, evaluate("x"))
 
     def test_not(self):
-        # test "if", "#t", "#f"
-        evaluate("(if (not #t) (define x 1) (define x 2))")
+        # test "if", "__True__", "__False__"
+        evaluate("(if (not __True__) (define x 1) (define x 2))")
         self.assertEqual(2, evaluate("x"))
-        evaluate("(if (not #f) (define x 3) (define x 4))")
+        evaluate("(if (not __False__) (define x 3) (define x 4))")
         self.assertEqual(3, evaluate("x"))
 
     def test_cond(self):

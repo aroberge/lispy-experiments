@@ -32,7 +32,7 @@ class InteractiveInterpreter:
                 return
             except Exception as e:
                 print('      {}: {}'.format(type(e).__name__, e))
-                if self.global_env["DEBUG"]:
+                if self.global_env["_DEBUG"]:
                     traceback.print_exc()
 
     def read_expression(self):
@@ -59,8 +59,14 @@ class InteractiveInterpreter:
             else:
                 self.show_variables(help[1])
         elif inp.startswith("dir"):
-            print("\n{}\n".format([x for x in self.global_env.keys()
-                                    if not x.startswith("__")]))
+            keys = [x for x in self.global_env.keys()
+                                    if not x.startswith("__")]
+            print("")
+            for i, k in enumerate(keys):
+                print("{0:25}".format(k), end='')
+                if i % 3 == 0:
+                    print("")
+            print("")
 
     def start(self):
         '''starts the interpreter if not already running'''
@@ -77,9 +83,9 @@ class InteractiveInterpreter:
         "Convert a Python object back into a Lisp-readable string."
         if not isinstance(exp, list):
             if exp is True:
-                return "#t"
+                return '"True"'
             elif exp is False:
-                return "#f"
+                return '"False"'
             elif isinstance(exp, complex):
                 return str(exp).replace('j', 'i')[1:-1]  # remove () put by Python
             return str(exp)
