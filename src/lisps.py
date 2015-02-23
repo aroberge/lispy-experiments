@@ -44,3 +44,12 @@ class Lisp:
         if not isinstance(_x, list):
             _x = [_x]
         return [expr[0]] + _x
+
+lisp_procs = {
+    'begin': Lisp.begin,
+    'atom?': Lisp.is_atom,
+    'eq?': Lisp.are_equal,
+    'car': Lisp.car,
+    'cdr': Lisp.cdr,
+    'cons': Lisp.cons
+}

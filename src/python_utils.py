@@ -32,3 +32,11 @@ def with_instance(inst, attr, *args):
             return attr
     else:
         print("{} has no attribute {}.".format(inst, attr))
+
+
+python_fns = {
+    'load-py': load_module,
+    'from-py-load': from_module_load,
+    'from-py-load-as': from_module_load_variable_as,
+    'with-py-inst': with_instance
+}
