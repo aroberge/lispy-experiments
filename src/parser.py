@@ -5,10 +5,11 @@ import re
 
 class Parser:
     "Parse a Lisp expression from a string"
-    def __init__(self, global_env=None, STRINGS=None):  # noqa
+    def __init__(self, STRINGS=None):  # noqa
         self.regex = re.compile('"(?:[^"])*"')
-        self.global_env = global_env
         self.STRINGS = STRINGS
+        if STRINGS is None:
+            self.STRINGS = {}
 
     def parse(self, s):
         "Parse a Lisp expression from a string."

@@ -186,7 +186,7 @@ def evaluate(x, env=None):
         except TypeError:
             return procedure(*exps)
 
-parse = Parser(global_env, STRINGS).parse
+parse = Parser(STRINGS).parse
 loader.evaluate = evaluate
 loader.parse = parse
 

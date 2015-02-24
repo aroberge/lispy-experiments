@@ -3,7 +3,7 @@ import unittest
 
 from src.parser import Parser
 
-parse = Parser({}, {}).parse
+parse = Parser().parse
 
 
 class TestParse(unittest.TestCase):

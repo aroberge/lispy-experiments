@@ -4,8 +4,7 @@ import petit_lisp as pl
 
 from src.parser import Parser
 
-STRINGS = {}
-parse = Parser(pl.global_env, STRINGS).parse
+parse = Parser().parse
 
 
 def evaluate(s):
