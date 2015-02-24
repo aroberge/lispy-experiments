@@ -1,4 +1,4 @@
-;; scoppe test
+;; scope test
 (define pi 3)  ; defined in global environment
 (define mul_pi (lambda (x) (begin
     (from-py-load 'math 'pi)  ;; should redifine pi to its correct value
