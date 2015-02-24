@@ -7,7 +7,7 @@ import traceback
 
 class InteractiveInterpreter:
     '''A simple interpreter with built-in help'''
-    def __init__(self, evaluate, parse, global_env):
+    def __init__(self, evaluate=None, parse=None, global_env=None):
         self.evaluate = evaluate
         self.parse = parse
         self.global_env = global_env

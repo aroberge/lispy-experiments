@@ -1,10 +1,7 @@
-''' usage: python test_petit.py
-'''
-import mock
+
 import unittest
 import petit_lisp as pl
 
-from src.repl import InteractiveInterpreter
 from src.parser import Parser
 
 STRINGS = {}
@@ -13,20 +10,6 @@ parse = Parser(pl.global_env, STRINGS).parse
 
 def evaluate(s):
     return pl.evaluate(parse(s))
-
-
-class TestRead(unittest.TestCase):
-    '''Ensures that we handle user input correctly'''
-
-    @mock.patch('builtins.input', return_value="(a b c)")
-    def test_get_expr_all_at_once(self, input):
-        repl = InteractiveInterpreter(pl.evaluate, parse, pl.global_env)
-        self.assertEqual("(a b c)", repl.read_expression())
-
-    @mock.patch('builtins.input', side_effect=['(a', 'b', 'c)'])
-    def test_get_expr_in_parts(self, input):
-        repl = InteractiveInterpreter(pl.evaluate, parse, pl.global_env)
-        self.assertEqual("(a b c)", repl.read_expression())
 
 
 class TestParse(unittest.TestCase):
