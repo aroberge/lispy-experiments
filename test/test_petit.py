@@ -5,8 +5,10 @@ import unittest
 import petit_lisp as pl
 
 from src.repl import InteractiveInterpreter
+from src.parser import Parser
 
-parse = pl.parse
+STRINGS = {}
+parse = Parser(pl.global_env, STRINGS).parse
 
 
 def evaluate(s):
@@ -40,6 +42,14 @@ class TestParse(unittest.TestCase):
 
     def test_parse_two_levels(self):
         self.assertEqual(['*', ['+', 3, 4], ['-', 2, 1]], parse(" (* ( + 3 4) (- 2 1))"))
+
+
+class TestLoadFile(unittest.TestCase):
+    '''Simple test to see if we load files correctly'''
+
+    def test_load_file(self):
+        pl.loader.load("test/define_variable_test.lisp")
+        self.assertEqual(3, evaluate("x"))
 
 
 class TestEvaluate(unittest.TestCase):
@@ -101,21 +111,13 @@ class TestEvaluate(unittest.TestCase):
         self.assertEqual(None, evaluate("(define square (lambda (x) (* x x)))"))
         self.assertEqual(9, evaluate("(square 3)"))
 
-    # def test_load_file(self):
-    #     pl.loader.load("../define_variable_test.lisp")
-    #     self.assertEqual(3, evaluate("x"))
-
-    # def test_load_file_with_comments(self):
-    #     pl.loader.load("../comments_test.lisp")
-    #     self.assertEqual(49, evaluate("(square 7)"))
-
     def test_load_python(self):
         # verify that Python module can be imported properly
         evaluate('(load-py (quote math))')
         self.assertEqual(4.0, evaluate("(sqrt 16)"))
 
     def test_load_python_scope(self):
-        pl.loader.load("scope_test.lisp")
+        pl.loader.load("test/scope_test.lisp")
         self.assertEqual(3, evaluate("pi"))
         from math import pi
         self.assertEqual(pi, evaluate("(mul_pi 1)"))
