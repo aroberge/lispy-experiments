@@ -21,7 +21,7 @@ class TestEvaluate(unittest.TestCase):
     def setUp(self):  # noqa
         pl.global_env = pl.common_env(pl.Env())
         self.fresh_env = pl.common_env(pl.Env())
-        evaluate("(load 'default_language.lisp)")
+        evaluate("(load 'src/default_language.lisp)")
 
     def tearDown(self):  # noqa
         pl.global_env = self.fresh_env
@@ -94,7 +94,7 @@ class TestLogic(unittest.TestCase):
     def setUp(self):  # noqa
         pl.global_env = pl.common_env(pl.Env())
         self.fresh_env = pl.common_env(pl.Env())
-        evaluate("(load 'default_language.lisp)")
+        evaluate("(load 'src/default_language.lisp)")
 
     def tearDown(self):  # noqa
         pl.global_env = self.fresh_env

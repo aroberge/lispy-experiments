@@ -200,6 +200,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         loader.load(sys.argv[1])
     else:
-        loader.load("default_language.lisp")
+        loader.load("src/default_language.lisp")
     interpreter = InteractiveInterpreter(evaluate, parse, global_env)
     interpreter.start()
