@@ -2,6 +2,7 @@
 '''
 
 import sys
+
 from src.file_loader import FileLoader
 from src.python_utils import python_fns
 from src.parser import Parser
@@ -181,9 +182,13 @@ def evaluate(x, env=None):
     else:                             # ("procedure" exp*)
         exps = [evaluate(exp, env) for exp in x]
         procedure = exps.pop(0)
-        try:
+        if (hasattr(procedure, '__kwdefaults__')
+                 and procedure.__kwdefaults__ is not None
+                 and "env" in procedure.__kwdefaults__):
+            if env is None:
+                env = global_env
             return procedure(*exps, env=env)
-        except TypeError:
+        else:
             return procedure(*exps)
 
 parse = Parser(STRINGS).parse

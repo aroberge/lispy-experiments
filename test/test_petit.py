@@ -5,10 +5,14 @@ import petit_lisp as pl
 from src.parser import Parser
 
 parse = Parser().parse
+env = None
 
 
 def evaluate(s):
-    return pl.evaluate(parse(s))
+    if env is None:
+        return pl.evaluate(parse(s))
+    else:
+        return pl.evaluate(parse(s), env=env)
 
 
 class TestEvaluate(unittest.TestCase):
@@ -72,8 +76,11 @@ class TestEvaluate(unittest.TestCase):
 
     def test_load_python(self):
         # verify that Python module can be imported properly
+        global env
+        env = pl.global_env
         evaluate('(load-py (quote math))')
-        self.assertEqual(4.0, evaluate("(sqrt 16)"))
+        self.assertEqual(4.0, evaluate("(sqrt 16.0)"))
+        env = None
 
     def test_load_python_scope(self):
         pl.loader.load("test/scope_test.lisp")

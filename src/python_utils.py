@@ -2,7 +2,7 @@
 import importlib
 
 
-def load_module(module, env=None):
+def load_module(module, *, env=None):
     '''(load-py 'module_name)'''
     mod = importlib.import_module(module)
     env.update(vars(mod))

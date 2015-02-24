@@ -21,6 +21,10 @@ class TestLists(unittest.TestCase):
         evaluate(expr)
         self.assertEqual(evaluate(expr2), evaluate("a"))
 
+    def test_cons_error(self):
+        expr = "(define a (cons 1 '2))"
+        self.assertRaises(ValueError, evaluate, expr)
+
     def test_car(self):
         expr = "(define a (cons 1 (cons 2 (cons 3 (cons 4 '())))))"
         expr2 = "(car a)"
