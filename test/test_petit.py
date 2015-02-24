@@ -11,14 +11,6 @@ def evaluate(s):
     return pl.evaluate(parse(s))
 
 
-class TestLoadFile(unittest.TestCase):
-    '''Simple test to see if we load files correctly'''
-
-    def test_load_file(self):
-        pl.loader.load("test/define_variable_test.lisp")
-        self.assertEqual(3, evaluate("x"))
-
-
 class TestEvaluate(unittest.TestCase):
     '''Evaluate expressions, using the parse function as a first step'''
 
