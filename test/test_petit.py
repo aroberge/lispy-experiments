@@ -20,14 +20,12 @@ class TestEvaluate(unittest.TestCase):
 
     def setUp(self):  # noqa
         pl.global_env = pl.common_env(pl.Env())
-        self.fresh_env = pl.common_env(pl.Env())
+        self.assertEqual(True, evaluate("(undefined? x)"))
         evaluate("(load 'src/default_language.lisp)")
-
-    def tearDown(self):  # noqa
-        pl.global_env = self.fresh_env
 
     def test_define(self):
         self.assertEqual(None, evaluate("(define x 3)"))
+        self.assertEqual(False, evaluate("(undefined? x)"))
         self.assertEqual(7, evaluate("(+ x 4)"))
         self.assertEqual(3, evaluate("x"))
 
@@ -60,11 +58,8 @@ class TestLogic(unittest.TestCase):
 
     def setUp(self):  # noqa
         pl.global_env = pl.common_env(pl.Env())
-        self.fresh_env = pl.common_env(pl.Env())
+        self.assertEqual(True, evaluate("(undefined? x)"))
         evaluate("(load 'src/default_language.lisp)")
-
-    def tearDown(self):  # noqa
-        pl.global_env = self.fresh_env
 
     def test_if(self):
         # test "if", "__True__", "__False__"

@@ -149,6 +149,7 @@ def evaluate(x, env=None):
     "Evaluate an expression in an environment."
     if env is None:
         env = global_env
+
     if isinstance(x, str):            # variable reference
         if x in STRINGS:
             return STRINGS[x]
@@ -156,7 +157,13 @@ def evaluate(x, env=None):
     elif not isinstance(x, list):     # constant literal
         return x
 
-    if x[0] == 'quote':              # (quote exp), or 'exp
+    elif x[0] == 'undefined?':        # (undefined? x)
+        try:
+            _ = env.find(x[1])
+            return False              # found ... so it is defined
+        except ValueError:
+            return True
+    elif x[0] == 'quote':              # (quote exp), or 'exp
         (_, exp) = x
         return exp
     elif x[0] == 'define':            # (define var exp)
