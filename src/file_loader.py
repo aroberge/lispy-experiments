@@ -1,4 +1,7 @@
 
+DEBUG = False
+
+
 class FileLoader:
     """Execute a "lisp" program in a file"""
 
@@ -8,7 +11,8 @@ class FileLoader:
 
     def load(self, filename):
         '''loads, parse and evaluate/executes a lisp program'''
-        print("    --> Loading {}".format(filename))
+        if DEBUG:
+            print("    --> Loading {}".format(filename))
 
         with open(filename, "r") as f:
             program = f.readlines()

@@ -26,39 +26,6 @@ class TestEvaluate(unittest.TestCase):
     def tearDown(self):  # noqa
         pl.global_env = self.fresh_env
 
-    def test_add(self):
-        self.assertEqual(7, evaluate("(+ 3 4)"))
-
-    def test_add_floats(self):
-        self.assertEqual(7.75, evaluate("(+ 3.25 4.5)"))
-
-    def test_sub(self):
-        self.assertEqual(1, evaluate("(- 4 3)"))
-        self.assertEqual(-1, evaluate("(- 3 4)"))
-
-    def test_add_many(self):
-        self.assertEqual(12, evaluate("(+ 3 4 5)"))
-
-    def test_mul(self):
-        self.assertEqual(12, evaluate("(* 3 4)"))
-        self.assertEqual(2.4, evaluate("(* 0.6 4)"))
-
-    def test_mul_many(self):
-        self.assertEqual(60, evaluate("(* 3 4 5)"))
-
-    def test_div(self):
-        self.assertEqual(2.0, evaluate("(/ 8 4)"))
-
-    def test_floor_div(self):
-        self.assertEqual(2, evaluate("(// 8 4)"))
-        self.assertEqual(2, evaluate("(// 9.1 4)"))
-
-    def test_parse_two_levels(self):
-        self.assertEqual(13, evaluate(" (+ (* 3 4) (- 2 1))"))
-
-    def test_parse_three_levels(self):
-        self.assertEqual(6, evaluate("(// (+ (* 3 4) (- 2 1)) 2)"))
-
     def test_define(self):
         self.assertEqual(None, evaluate("(define x 3)"))
         self.assertEqual(7, evaluate("(+ x 4)"))

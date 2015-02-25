@@ -13,17 +13,14 @@ def evaluate(s):
     else:
         return pl.evaluate(parse(s), env=env)
 
-prereqs = '''(begin
-(define else __True__)
+prereqs = '''(define else __True__)
 (define #t __True__)
 (define #f __False__)
 (define null '())
 (from-py-load-as 'operator '(eq __eq__))
 (define null? (lambda (x) (__eq__ x '())))
 (from-py-load-as 'operator '(not_ __not__))
-(define not (lambda (x) (__not__ x)))
-)
-'''
+(define not (lambda (x) (__not__ x)))'''
 
 
 class TestMath(unittest.TestCase):
@@ -31,7 +28,9 @@ class TestMath(unittest.TestCase):
 
 
     def setUp(self):  # noqa
-        evaluate(prereqs)
+        for expr in prereqs.split("\n"):
+            if len(expr.split()) > 0:
+                evaluate(expr)
         evaluate("(load 'src/math.lisp)")
 
     def test_add(self):
